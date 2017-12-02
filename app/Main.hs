@@ -6,4 +6,4 @@ import           Lib
 
 
 main :: IO ()
-main = getArgs >>= print . day02a . head
+main = getArgs >>= print . day02b . head

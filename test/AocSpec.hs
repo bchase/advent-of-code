@@ -12,6 +12,10 @@ spec = do
       let input = "5 1 9 5\n7 5 3\n2 4 6 8"
       it "generates a checksum of the input" $ do
         (day02a input) `shouldBe` 18
+    describe "Day02B" $ do
+      let input = "5 9 2 8\n 9 4 7 3\n 3 8 6 5"
+      it "generates a checksum of the input" $ do
+        (day02b input) `shouldBe` 9
 
   -- describe "Day01" $ do
   --   describe "Day01A" $ do
