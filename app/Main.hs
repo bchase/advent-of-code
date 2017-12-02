@@ -1,6 +1,9 @@
 module Main where
 
-import Lib
+import           System.Environment (getArgs)
+
+import           Lib
+
 
 main :: IO ()
-main = someFunc
+main = getArgs >>= putStrLn . show . day01a . head
