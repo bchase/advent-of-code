@@ -20,4 +20,4 @@ day02b = sum . map quotientOfEvenlyDivisiblePairs . parseRows
 
 parseRows :: String -> [[Int]]
 parseRows = map ints . lines
-  where ints = map (read :: String -> Int) . map fst . scan [re|\d+|]
+  where ints = map read . map fst . scan [re|\d+|]

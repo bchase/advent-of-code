@@ -13,7 +13,7 @@ day01b str = day01 (length str `quot` 2) str
 day01 :: Int -> String -> Int
 day01 _ "" = 0
 day01 times str =
-  let nums = map ((read :: String -> Int) . return) $ str
+  let nums = map read . return $ str
    in sum . map fst . filter (\(n0,n1) -> n0 == n1) . zip (rotate times nums) $ nums
   where
     rotate :: Int -> [a] -> [a]
