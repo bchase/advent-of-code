@@ -1,5 +1,6 @@
 module Main where
 
+import qualified Data.Text          as T
 import           Data.Maybe         (maybe)
 import qualified Data.Map           as Map
 import           Data.Map           (Map, fromList)
@@ -12,18 +13,19 @@ type Year = Int
 type Day  = Int
 
 main :: IO ()
-main = readArgs >>= maybe printUsage run
+main = readArgs >>= maybe (putStrLn "ERROR") run
   where
     readArgs :: IO (Maybe (Year, Day, String))
-    readArgs = getArgs >>= \args ->
+    readArgs = getArgs >>= \args -> do
       case args of
-        [y,d,i] -> return $ Just (read y, read d, i)
-        _       -> return Nothing
+        [y,d,f] -> do
+          i <- readFile f >>= return . T.unpack . T.strip . T.pack
+          return $ Just (read y, read d, i)
+        _ -> return Nothing
 
     run :: (Year, Day, String) -> IO ()
     run (y,d,i) = maybe (invalid y d) (\f -> f i >>= mapM_ putStrLn) $ Map.lookup (y,d) days
 
-    printUsage = putStrLn "$ aoc YEAR DAY INPUT"
     invalid y d = putStrLn $ "Not a valid year/day: " ++ (show y) ++ "/" ++ (show d)
 
 
