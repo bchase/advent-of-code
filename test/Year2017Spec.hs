@@ -1,8 +1,8 @@
-module AocSpec where
+module Year2017Spec where
 
 import           Test.Hspec
 
-import           Lib
+import           Year2017
 
 
 spec :: Spec

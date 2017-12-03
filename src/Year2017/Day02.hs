@@ -1,4 +1,4 @@
-module Day02
+module Year2017.Day02
   ( day02
   , day02parse
   , day02a

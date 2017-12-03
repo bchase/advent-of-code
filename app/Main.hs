@@ -4,7 +4,7 @@ import qualified Data.Map           as Map
 import           Data.Map           (Map, fromList)
 import           System.Environment (getArgs)
 
-import           Lib
+import           Year2017
 
 
 main :: IO ()
