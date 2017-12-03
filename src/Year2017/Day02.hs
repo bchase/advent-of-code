@@ -1,9 +1,4 @@
-module Year2017.Day02
-  ( day02
-  , day02parse
-  , day02a
-  , day02b
-  ) where
+module Year2017.Day02 ( day02 ) where
 
 
 day02a, day02b :: [[Int]] -> Int
@@ -16,7 +11,7 @@ common f = sum . map f
 day02parse :: String -> [[Int]]
 day02parse = map (map read . words) . lines
 
-day02 :: String -> IO (String, String)
+day02 :: String -> [String]
 day02 input =
   let rows = day02parse input
-   in return (show . day02a $ rows, show . day02b $ rows)
+   in map show [ day02a rows, day02b rows ]

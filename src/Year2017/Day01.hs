@@ -1,9 +1,4 @@
-module Year2017.Day01
-  ( day01
-  , day01parse
-  , day01a
-  , day01b
-  ) where
+module Year2017.Day01 ( day01 ) where
 
 
 day01a :: [Int] -> Int
@@ -23,7 +18,7 @@ common times nums =
 day01parse :: String -> [Int]
 day01parse = map (read . return)
 
-day01 :: String -> IO (String, String)
+day01 :: String -> [String]
 day01 input =
   let nums = day01parse input
-   in return (show . day01a $ nums, show . day01b $ nums)
+   in map show [ day01a nums, day01b nums ]
