@@ -1,20 +1,29 @@
 module Day01
-  ( day01a
+  ( day01
+  , day01parse
+  , day01a
   , day01b
   ) where
 
 
-day01a :: String -> Int
-day01a = day01 1
+day01a :: [Int] -> Int
+day01a = common 1
 
-day01b :: String -> Int
-day01b str = day01 (length str `quot` 2) str
+day01b :: [Int] -> Int
+day01b str = common (length str `quot` 2) str
 
-day01 :: Int -> String -> Int
-day01 _ "" = 0
-day01 times str =
-  let nums = map (read . return) str
-   in sum . map fst . filter (\(n0,n1) -> n0 == n1) . zip (rotate times nums) $ nums
+common :: Int -> [Int] -> Int
+common _ [] = 0
+common times nums =
+  sum . map fst . filter (\(n0,n1) -> n0 == n1) . zip (rotate times nums) $ nums
   where
     rotate :: Int -> [a] -> [a]
     rotate t xs = (drop t xs) ++ (take t xs)
+
+day01parse :: String -> [Int]
+day01parse = map (read . return)
+
+day01 :: String -> IO (String, String)
+day01 input =
+  let nums = day01parse input
+   in return (show . day01a $ nums, show . day01b $ nums)
