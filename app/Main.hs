@@ -9,7 +9,7 @@ import           Lib
 
 main :: IO ()
 main = do
-  putStrLn "$ aoc2017 (day :: Int) (input :: String)"
+  putStrLn "$ aoc (day :: Int) (input :: String)"
   args <- getArgs
   let day = read . head $ args :: Int
       input = head . tail $ args

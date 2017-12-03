@@ -1,1 +1,1 @@
-# aoc2017
+# _Advent of Code_ Haskell Solutions
