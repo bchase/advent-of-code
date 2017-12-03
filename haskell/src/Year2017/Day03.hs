@@ -44,31 +44,19 @@ type Grid = [[Int]]
 
 buildGrid :: Int -> Grid
 buildGrid square = snd . foldr (\_ (curr, grid) -> (succ curr, buildGrid' curr grid)) (1, [[1]]) $ [1..square]
--- buildGrid' 1 square [[1]]
   where
-    -- f :: [Int] -> (Int, [[Int]]) -> (Int, [[Int]])
-    -- f = undefined
-
     buildGrid' :: Int -> Grid-> Grid
     buildGrid' 1 grid = grid
-    -- buildGrid' from to grid = [[]]
-    buildGrid' curr grid =
+    buildGrid' curr grid = do
+      let from = succ ((pred curr) ^ (2 :: Int))
+          line = reverse . drop curr $ [(pred from)..(curr ^ (2 :: Int))]
       case even curr of
-        False ->   -- from ODD TO EVEN: unshift to first-to-last, then push new list
-          [ [ 5,  4,  3 ]
-          , [ 6,  1,  2 ]
-          , [ 7,  8,  9 ]
-          ]
-        True -> do  -- from EVEN to ODD: push to last-to-first, then unshift new list
-          let grid' = snd . foldr (\ns (n, nss) -> (succ n, nss ++ [ns ++ [n]])) (curr, []) $ grid
-              line  = reverse [succ curr .. curr ^ (2 :: Int)]
-
+        False -> do -- from ODD TO EVEN: unshift to first-to-last, then push new list
+          let grid' = snd . foldl (\(n, nss) ns -> (succ n, nss ++ [n:ns])) (from, []) $ grid
+          grid' ++ [reverse line]
+        True -> do -- from EVEN to ODD: push to last-to-first, then unshift new list
+          let grid' = snd . foldr (\ns (n, nss) -> (succ n, nss ++ [ns ++ [n]])) (from, []) $ grid
           line:grid'
-
-          -- [ [4, 3]
-          -- , [1, 2]
-          -- ]
-
 
 
 -- day03a, day03b :: Grid -> Int
