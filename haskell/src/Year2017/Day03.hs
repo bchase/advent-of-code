@@ -1,5 +1,9 @@
 module Year2017.Day03 ( day03 ) where
 
+import           Data.List  (findIndex)
+import           Data.Maybe (catMaybes, fromJust)
+-- import           Control.Monad (join)
+
 -- [ [1]
 -- ]
 --
@@ -39,8 +43,18 @@ module Year2017.Day03 ( day03 ) where
 -- -- , [ 20,  7,  8,  9, 10 ] -- 3x3 3^2 ODD
 -- -- , [ 21, 22, 23, 24, 25 ] -- 5%5 5^2 ODD
 -- -- ]
+--
+-- -- [ [  4,  3,  2,  3,  4 ] -- 4x4 4^2 EVEN
+-- -- , [  3,  2,  1,  2,  3 ] -- 2x2 2^2 EVEN
+-- -- , [  2,  1,  0,  1,  2 ] -- 1x1 1^2 ODD (ONE)
+-- -- , [  3,  2,  1,  2,  3 ] -- 3x3 3^2 ODD
+-- -- , [  4,  3,  2,  3,  4 ] -- 5%5 5^2 ODD
+-- -- ]
 
+
+-- type Dist = Int
 type Grid = [[Int]]
+-- type TaggedGrid = [[(Int, Dist)]]
 
 buildGrid :: Int -> Grid
 buildGrid square = snd . foldr (\_ (curr, grid) -> (succ curr, buildGrid' curr grid)) (1, [[1]]) $ [1..square]
@@ -58,6 +72,31 @@ buildGrid square = snd . foldr (\_ (curr, grid) -> (succ curr, buildGrid' curr g
           let grid' = snd . foldr (\ns (n, nss) -> (succ n, nss ++ [ns ++ [n]])) (from, []) $ grid
           line:grid'
 
+getCoords :: Int -> Grid -> Maybe (Int, Int)
+getCoords val grid = do
+  Just . head . catMaybes . map (\(idx, row) -> findIndex ((==) val) row >>= Just . (flip (,) idx)) . zip [0..] $ grid
+
+-- tagGrid :: Grid -> TaggedGrid
+-- tagGrid []    = []
+-- tagGrid [[]]  = []
+-- tagGrid [[1]] = [[(1,0)]]
+-- tagGrid grid@(row:_) =
+--   let height = length grid
+--       width  = length row
+--   grid
+-- [ [  3,  2,  3,  4 ]
+-- , [  2,  1,  2,  3 ]
+-- , [  1,  0,  1,  2 ]
+-- , [  2,  1,  2,  3 ]
+-- ]
+--
+-- [ [  4,  3,  2,  3,  4 ]
+-- , [  3,  2,  1,  2,  3 ]
+-- , [  2,  1,  0,  1,  2 ]
+-- , [  3,  2,  1,  2,  3 ]
+-- , [  4,  3,  2,  3,  4 ]
+-- ]
+
 
 -- day03a, day03b :: Grid -> Int
 -- day03a :: Int -> Int
@@ -66,7 +105,13 @@ buildGrid square = snd . foldr (\_ (curr, grid) -> (succ curr, buildGrid' curr g
 day03parse :: String -> Int
 day03parse = read
 
-day03 :: String -> [String]
-day03 input =
-  let loc = day03parse input
-   in map show [ buildGrid loc, [[1]] ]
+day03 :: String -> IO [String]
+day03 input = do
+  let val = day03parse input
+      gridSize = ceiling . sqrt $ (fromIntegral val :: Double)
+      grid = buildGrid gridSize
+      (oneX,oneY) = fromJust $ getCoords 1 grid
+      (locX,locY) = fromJust $ getCoords val grid
+      dist = (abs (oneX - locX)) + (abs (oneY - locY))
+  -- mapM_ print grid >> putStrLn input
+  return . map show $ [ dist ]
