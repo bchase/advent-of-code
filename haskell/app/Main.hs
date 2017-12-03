@@ -34,4 +34,5 @@ days =
   fromList
     [ ((2017, 1), return . day01)
     , ((2017, 2), return . day02)
+    , ((2017, 3), return . day03)
     ]

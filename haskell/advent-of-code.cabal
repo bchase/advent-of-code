@@ -19,6 +19,7 @@ library
   exposed-modules:     Year2017
   other-modules:       Year2017.Day01
                      , Year2017.Day02
+                     , Year2017.Day03
   build-depends:       base >= 4.7 && < 5
                      , safe
   default-language:    Haskell2010
