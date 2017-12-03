@@ -1,9 +1,12 @@
 module Year2017.Day02 ( day02 ) where
 
+import           Safe (headMay)
+
 
 day02a, day02b :: [[Int]] -> Int
 day02a = common $ \ns -> maximum ns - minimum ns
-day02b = common $ \ns -> head [x `div` y | x <- ns, y <- ns, x > y && x `rem` y == 0]
+day02b = common $ \ns ->
+  maybe 0 id $ headMay [x `div` y | x <- ns, y <- ns, x > y && x `rem` y == 0]
 
 common :: ([Int] -> Int) -> [[Int]] -> Int
 common f = sum . map f
