@@ -1,5 +1,6 @@
 module Main where
 
+-- import           Data.Maybe         (maybe)
 import qualified Data.Map           as Map
 import           Data.Map           (Map, fromList)
 import           System.Environment (getArgs)
@@ -7,21 +8,28 @@ import           System.Environment (getArgs)
 import           Year2017
 
 
+type Year = Int
+type Day  = Int
+
 main :: IO ()
-main = do
-  putStrLn "$ aoc (day :: Int) (input :: String)"
-  args <- getArgs
-  let day = read . head $ args :: Int
-      input = head . tail $ args
-      mFunc = Map.lookup day days
-  case mFunc of
-    Nothing -> putStrLn $ "Not a valid day: " ++ (show day)
-    Just f  -> f input >>= \(a,b) -> print ("A: " ++ a, "B: " ++ b)
+main = readArgs >>= maybe printUsage run
+  where
+    printUsage = putStrLn "$ aoc YEAR DAY INPUT"
 
+    run (year, day, input) = do
+      case Map.lookup (year, day) days of
+        Nothing -> putStrLn $ "Not a valid day: " ++ (show day)
+        Just f  -> f input >>= \(a,b) -> print ("A: " ++ a, "B: " ++ b)
 
-days :: Map Int (String -> IO (String, String))
+    readArgs :: IO (Maybe (Year, Day, String))
+    readArgs = getArgs >>= \args ->
+      case args of
+        [y,d,i] -> return $ Just (read y, read d, i)
+        _       -> return Nothing
+
+days :: Map (Year, Day) (String -> IO (String, String))
 days =
   fromList
-    [ (1, day01)
-    , (2, day02)
+    [ ((2017, 1), day01)
+    , ((2017, 2), day02)
     ]
