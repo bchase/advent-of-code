@@ -1,10 +1,6 @@
-# _Advent of Code_ Haskell Solutions
+# _Advent of Code_ Solutions
 
 ```
-$ stack setup
-$ ./bin/build && ./bin/run 2017 1 1122
-```
-
-```
-$ run YEAR DAY INPUT
+$ ./aoc run  LANG YEAR DAY INPUT
+$ ./aoc test LANG YEAR DAY
 ```

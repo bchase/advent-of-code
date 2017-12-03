@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+
+require 'yaml'
+
+
+def print_usage
+  puts ""
+  puts "$ aoc run  LANG YEAR DAY INPUT"
+  puts "$ aoc test LANG YEAR DAY"
+end
+
+def build(lang)
+  %x[ ( cd ./#{lang}/bin && ./build ) ].strip
+end
+
+def run(lang, year, day, input)
+  %x[ ( cd ./#{lang}/bin && ./run #{year} #{day} #{input.inspect} ) ].strip
+end
+
+def test(args)
+  lang, year, day = args
+
+  yml = YAML.load_file("test/#{year}/#{'%02d' % day}.yml")
+  a_tests = yml['a'].map{|t| [0, t]}
+  b_tests = yml['b'].map{|t| [1, t]}
+
+  runner = method(:run).curry.call(lang, year)
+
+  (a_tests + b_tests).map &method(:run_test).curry.call(runner, day)
+end
+def run_test(runner, day, args)
+  ab, test = args
+  input = test['input'].to_s
+
+  expected = test['output'].to_s
+  actual   = runner.call(day, input).split[ab]
+
+  if actual != expected
+    part = %w[A B][ab]
+    puts ""
+    puts "FAILED -- DAY#{day}#{part}"
+    puts "  INPUT           #{input.inspect}"
+    puts "  OUTPUT:EXPECTED #{expected.inspect}"
+    puts "  OUTPUT:ACTUAL   #{actual.inspect}"
+  # else
+  #   puts "PASS: #{input} -> #{actual} == #{expected}"
+  end
+end
+
+cmd, *args = ARGV
+lang = args.first
+
+if cmd == 'test'
+  build(lang)
+  test(args)
+elsif cmd == 'run'
+  build(lang)
+  puts run(*args)
+else
+  puts %[aoc : Unrecognized Command #{cmd.inspect}]
+  print_usage
+end
