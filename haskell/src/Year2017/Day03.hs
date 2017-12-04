@@ -53,28 +53,11 @@ import           Control.Monad (join)
 -- -- ]
 
 
-type Grid = [[Int]]
-
+type Coords = (Int, Int)
 type Address = Int
 type Val = Int
-type GridArray = Array (Int, Int) (Address, Val)
+type Grid = Array Coords (Address, Val)
 
-
-buildGrid :: Int -> Grid
-buildGrid square = snd . foldr (\_ (curr, grid) -> (succ curr, buildGrid' curr grid)) (1, [[1]]) $ [1..square]
-  where
-    buildGrid' :: Int -> Grid-> Grid
-    buildGrid' 1 grid = grid
-    buildGrid' curr grid = do
-      let from = succ ((pred curr) ^ (2 :: Int))
-          line = reverse . drop curr $ [(pred from)..(curr ^ (2 :: Int))]
-      case even curr of
-        False -> do -- from ODD TO EVEN: unshift to first-to-last, then push new list
-          let grid' = snd . foldl (\(n, nss) ns -> (succ n, nss ++ [n:ns])) (from, []) $ grid
-          grid' ++ [reverse line]
-        True -> do -- from EVEN to ODD: push to last-to-first, then unshift new list
-          let grid' = snd . foldr (\ns (n, nss) -> (succ n, nss ++ [ns ++ [n]])) (from, []) $ grid
-          line:grid'
 
 -- day02b :: Val -> Grid -> Int
 -- day02b _ [] = 0
@@ -82,19 +65,19 @@ buildGrid square = snd . foldr (\_ (curr, grid) -> (succ curr, buildGrid' curr g
 --   let vals = join . map (\(y,row) -> map (\(x,val) -> ((x,y),(val,0))) . zip [0..] $ row) . zip [0..] $ grid
 --       one = fromJust $ getCoords 1 grid
 --       maxIdx = length grid
---       arr = array ((0,maxIdx),(0,maxIdx)) vals :: GridArray
+--       arr = array ((0,maxIdx),(0,maxIdx)) vals :: Grid
 --    in sequentiallyFillInGridArrayUntilTarget maxIdx target arr
 --   where
---     sequentiallyFillInGridArrayUntilTarget :: Int -> Val -> GridArray -> Val
+--     sequentiallyFillInGridArrayUntilTarget :: Int -> Val -> Grid -> Val
 --     sequentiallyFillInGridArrayUntilTarget maxIdx target arr =
 --
 --       addressForNext = getCoords
 
 
-    -- writeValsUntil :: Int -> Val -> GridArray -> Int
+    -- writeValsUntil :: Int -> Val -> Grid -> Int
     -- writeValsUntil maxIdx target arr = writeValsUntil' 1 maxIdx target arr
     --
-    -- writeValsUntil' :: Int -> Address -> Val -> GridArray -> Int
+    -- writeValsUntil' :: Int -> Address -> Val -> Grid -> Int
     -- writeValsUntil' maxIdx 1 target arr = arr//[()]
     -- writeValsUntil' maxIdx address target arr =
 
@@ -102,13 +85,13 @@ buildGrid square = snd . foldr (\_ (curr, grid) -> (succ curr, buildGrid' curr g
   -- let vals = join . map (\(y,row) -> map (\(x,val) -> ((x,y),(val,0))) . zip [0..] $ row) . zip [0..] $ grid
   --     one = fromJust $ getCoords 1 grid
   --     maxIdx = length grid
-  --     arr = array ((0,maxIdx),(0,maxIdx)) vals :: GridArray
+  --     arr = array ((0,maxIdx),(0,maxIdx)) vals :: Grid
   --  in writeValsUntil target arr
   -- where
-  --   writeValsUntil :: Val -> GridArray -> Int
+  --   writeValsUntil :: Val -> Grid -> Int
   --   writeValsUntil target arr = writeValsUntil' 1 target arr
   --
-  --   writeValsUntil' :: Address -> Val -> GridArray -> Int
+  --   writeValsUntil' :: Address -> Val -> Grid -> Int
   --   writeValsUntil' address target arr =
 
 
@@ -146,19 +129,42 @@ day03 :: String -> IO [String]
 day03 input = do
   let val = day03parse input
       gridSize = ceiling . sqrt $ (fromIntegral val :: Double)
-      grid = buildGrid gridSize
-      arr  = buildGridArray grid
-      (oneX,oneY) = fromJust $ getCoords 1 arr
-      (locX,locY) = fromJust $ getCoords val arr
+      grid = buildGridArray gridSize
+      (oneX,oneY) = fromJust $ getCoordsForAddress 1 grid
+      (locX,locY) = fromJust $ getCoordsForAddress val grid
       dist = (abs (oneX - locX)) + (abs (oneY - locY))
   -- mapM_ print grid >> putStrLn input
   return . map show $ [ dist ]
-  where
-    buildGridArray :: Grid -> GridArray
-    buildGridArray grid =
-      let vals = join . map (\(y,row) -> map (\(x,a) -> ((x,y),(a,0))) . zip [0..] $ row) . zip [0..] $ grid
-          maxIdx = length grid - 1
-       in array ((0,0),(maxIdx,maxIdx)) vals
 
-    getCoords :: Int -> GridArray -> Maybe (Int, Int)
-    getCoords val arr = fmap fst . find (\(_, (address,_)) -> address == val) . assocs $ arr
+getCoordsForAddress :: Address -> Grid -> Maybe (Int, Int)
+getCoordsForAddress addr = fmap fst . find (((==) addr) . fst . snd) . assocs
+
+-- xs = join [[xp,xm] | xp <- x+1, xm <- x-1]
+-- yx = join [[yp,ym] | yp <- y+1, ym <- y-1]
+-- xy = [(x',y') | x' <- xs, y' <- yx, x' >= 0 && x' <= max' && y' >= 0 && y' <= max' ]
+-- getValForCoords :: (Coords, Coords) -> Coords -> Grid -> Maybe (Int, Int)
+-- getValForCoords (min',max') val grid = undefined
+
+buildGridArray :: Int -> Grid
+buildGridArray size =
+  let grid = buildListGrid size
+      maxIdx = length grid - 1
+      vals = join . map (\(y,row) -> map (\(x,a) -> ((x,y),(a,0))) . zip [0..] $ row) . zip [0..] $ grid
+   in array ((0,0),(maxIdx,maxIdx)) vals
+  where
+    buildListGrid :: Int -> [[Int]]
+    buildListGrid square =
+      snd . foldr (\_ (curr, grid) -> (succ curr, buildListGrid' curr grid)) (1, [[1]]) $ [1..square]
+
+    buildListGrid' :: Int -> [[Int]]-> [[Int]]
+    buildListGrid' 1 grid = grid
+    buildListGrid' curr grid = do
+      let from = succ ((pred curr) ^ (2 :: Int))
+          line = reverse . drop curr $ [(pred from)..(curr ^ (2 :: Int))]
+      case even curr of
+        False -> do -- from ODD TO EVEN: unshift to first-to-last, then push new list
+          let grid' = snd . foldl (\(n, nss) ns -> (succ n, nss ++ [n:ns])) (from, []) $ grid
+          grid' ++ [reverse line]
+        True -> do -- from EVEN to ODD: push to last-to-first, then unshift new list
+          let grid' = snd . foldr (\ns (n, nss) -> (succ n, nss ++ [ns ++ [n]])) (from, []) $ grid
+          line:grid'
