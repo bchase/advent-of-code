@@ -16,7 +16,8 @@ description:         Please see the README on Github at <https://github.com/bcha
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Year2017
+  exposed-modules:     Types
+                     , Year2017
   other-modules:       Year2017.Day01
                      , Year2017.Day02
                      , Year2017.Day03

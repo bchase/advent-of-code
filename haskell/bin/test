@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo $4 > tmp_input
+stack exec advent-of-code "test" $1 $2 $3 tmp_input
+rm tmp_input

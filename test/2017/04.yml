@@ -1,11 +1,11 @@
-a:
+A:
   - input: aa bb cc dd ee
     output: "True"
   - input: aa bb cc dd aa
     output: "False"
   - input: aa bb cc dd aaa
     output: "True"
-b:
+B:
   - input: abcde fghi
     output: "True"
   - input: abcde xyz ecdab

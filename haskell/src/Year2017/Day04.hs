@@ -4,9 +4,11 @@ import           Data.List.Unique (unique)
 import qualified Data.Map.Strict  as Map
 import           Data.Map.Strict  (Map)
 
+import           Types
 
-day04 :: String -> IO [String]
-day04 passphrase = do
+
+day04 :: Mode -> AB -> String -> IO [String]
+day04 _ _ passphrase = do
   -- return [show . length . filter id . map hasNoDuplicateTokens . lines $ ps] -- PART 1
   -- return [show . length . filter id . map hasNoAnagramTokens . lines $ ps]   -- PART 2
   return $ map show [ hasNoDuplicateTokens passphrase

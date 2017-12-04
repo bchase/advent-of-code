@@ -13,50 +13,50 @@ def build(lang)
   %x[ ( cd ./#{lang}/bin && ./build ) ].strip
 end
 
-def run(lang, year, day, input)
-  %x[ ( cd ./#{lang}/bin && ./run #{year} #{day} #{input.inspect} ) ].strip
+def run(lang, year, day, ab, input)
+  %x[ ( cd ./#{lang}/bin && ./run #{year} #{day} #{ab} #{input.inspect} ) ].strip
 end
 
-def test(args)
-  lang, year, day = args
+def test(lang, year, day, ab)
+  yml = YAML.load_file("test/#{year}/#{"%02d" % day}.yml")
+  tests = yml.fetch(ab.upcase)
 
-  yml = YAML.load_file("test/#{year}/#{'%02d' % day}.yml")
-  a_tests = yml['a'].map{|t| [0, t]}
-  b_tests = yml['b'].map{|t| [1, t]}
+  tests.map {|io|
+    i, o = [ io['input'], io['output'] ]
 
-  runner = method(:run).curry.call(lang, year)
+    [ i, %x[ ( cd ./#{lang}/bin && ./test #{year} #{day} #{ab} #{i.inspect} ) ].strip, o ]
+  }
+  .map { |input, output, expected|
+    actual, *rest = output.split
 
-  (a_tests + b_tests).map &method(:run_test).curry.call(runner, day)
-end
-def run_test(runner, day, args)
-  ab, test = args
-  input = test['input'].to_s
+    (actual == expected).tap do |pass|
+      unless pass
+        puts
+        puts "FAILED -- DAY#{day}#{ab.upcase}"
+        puts "  INPUT           #{input.inspect}"
+        puts "  OUTPUT:EXPECTED #{expected.inspect}"
+        puts "  OUTPUT:ACTUAL   #{actual.inspect}"
+      end
+    end
+  }.tap do |results|
+    passes = results.reject(&:!).count
+    total  = tests.count
 
-  expected = test['output'].to_s
-  actual   = runner.call(day, input).split[ab]
-
-  if actual != expected
-    part = %w[A B][ab]
-    puts ""
-    puts "FAILED -- DAY#{day}#{part}"
-    puts "  INPUT           #{input.inspect}"
-    puts "  OUTPUT:EXPECTED #{expected.inspect}"
-    puts "  OUTPUT:ACTUAL   #{actual.inspect}"
-  # else
-  #   puts "PASS: #{input} -> #{actual} == #{expected}"
+    puts "\n#{passes}/#{total}"
   end
 end
+
 
 cmd, *args = ARGV
 lang = args.first
 
 if cmd == 'test'
   build(lang)
-  test(args)
+  test(*args)
 elsif cmd == 'run'
   build(lang)
   puts run(*args)
 else
-  puts %[aoc : Unrecognized Command #{cmd.inspect}]
+  puts %[`aoc` : Unrecognized Command #{cmd.inspect}]
   print_usage
 end
