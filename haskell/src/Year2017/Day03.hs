@@ -1,8 +1,9 @@
 module Year2017.Day03 ( day03 ) where
 
-import           Data.List  (findIndex)
-import           Data.Maybe (catMaybes, fromJust)
--- import           Control.Monad (join)
+import           Data.List  (find)
+import           Data.Array (Array, array, assocs)
+import           Data.Maybe (fromJust)
+import           Control.Monad (join)
 
 -- [ [1]
 -- ]
@@ -52,9 +53,12 @@ import           Data.Maybe (catMaybes, fromJust)
 -- -- ]
 
 
--- type Dist = Int
 type Grid = [[Int]]
--- type TaggedGrid = [[(Int, Dist)]]
+
+type Address = Int
+type Val = Int
+type GridArray = Array (Int, Int) (Address, Val)
+
 
 buildGrid :: Int -> Grid
 buildGrid square = snd . foldr (\_ (curr, grid) -> (succ curr, buildGrid' curr grid)) (1, [[1]]) $ [1..square]
@@ -72,9 +76,42 @@ buildGrid square = snd . foldr (\_ (curr, grid) -> (succ curr, buildGrid' curr g
           let grid' = snd . foldr (\ns (n, nss) -> (succ n, nss ++ [ns ++ [n]])) (from, []) $ grid
           line:grid'
 
-getCoords :: Int -> Grid -> Maybe (Int, Int)
-getCoords val grid = do
-  Just . head . catMaybes . map (\(idx, row) -> findIndex ((==) val) row >>= Just . (flip (,) idx)) . zip [0..] $ grid
+-- day02b :: Val -> Grid -> Int
+-- day02b _ [] = 0
+-- day02b target grid =
+--   let vals = join . map (\(y,row) -> map (\(x,val) -> ((x,y),(val,0))) . zip [0..] $ row) . zip [0..] $ grid
+--       one = fromJust $ getCoords 1 grid
+--       maxIdx = length grid
+--       arr = array ((0,maxIdx),(0,maxIdx)) vals :: GridArray
+--    in sequentiallyFillInGridArrayUntilTarget maxIdx target arr
+--   where
+--     sequentiallyFillInGridArrayUntilTarget :: Int -> Val -> GridArray -> Val
+--     sequentiallyFillInGridArrayUntilTarget maxIdx target arr =
+--
+--       addressForNext = getCoords
+
+
+    -- writeValsUntil :: Int -> Val -> GridArray -> Int
+    -- writeValsUntil maxIdx target arr = writeValsUntil' 1 maxIdx target arr
+    --
+    -- writeValsUntil' :: Int -> Address -> Val -> GridArray -> Int
+    -- writeValsUntil' maxIdx 1 target arr = arr//[()]
+    -- writeValsUntil' maxIdx address target arr =
+
+
+  -- let vals = join . map (\(y,row) -> map (\(x,val) -> ((x,y),(val,0))) . zip [0..] $ row) . zip [0..] $ grid
+  --     one = fromJust $ getCoords 1 grid
+  --     maxIdx = length grid
+  --     arr = array ((0,maxIdx),(0,maxIdx)) vals :: GridArray
+  --  in writeValsUntil target arr
+  -- where
+  --   writeValsUntil :: Val -> GridArray -> Int
+  --   writeValsUntil target arr = writeValsUntil' 1 target arr
+  --
+  --   writeValsUntil' :: Address -> Val -> GridArray -> Int
+  --   writeValsUntil' address target arr =
+
+
 
 -- tagGrid :: Grid -> TaggedGrid
 -- tagGrid []    = []
@@ -110,8 +147,18 @@ day03 input = do
   let val = day03parse input
       gridSize = ceiling . sqrt $ (fromIntegral val :: Double)
       grid = buildGrid gridSize
-      (oneX,oneY) = fromJust $ getCoords 1 grid
-      (locX,locY) = fromJust $ getCoords val grid
+      arr  = buildGridArray grid
+      (oneX,oneY) = fromJust $ getCoords 1 arr
+      (locX,locY) = fromJust $ getCoords val arr
       dist = (abs (oneX - locX)) + (abs (oneY - locY))
   -- mapM_ print grid >> putStrLn input
   return . map show $ [ dist ]
+  where
+    buildGridArray :: Grid -> GridArray
+    buildGridArray grid =
+      let vals = join . map (\(y,row) -> map (\(x,a) -> ((x,y),(a,0))) . zip [0..] $ row) . zip [0..] $ grid
+          maxIdx = length grid - 1
+       in array ((0,0),(maxIdx,maxIdx)) vals
+
+    getCoords :: Int -> GridArray -> Maybe (Int, Int)
+    getCoords val arr = fmap fst . find (\(_, (address,_)) -> address == val) . assocs $ arr

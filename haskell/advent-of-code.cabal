@@ -21,6 +21,7 @@ library
                      , Year2017.Day02
                      , Year2017.Day03
   build-depends:       base >= 4.7 && < 5
+                     , array
                      , safe
   default-language:    Haskell2010
 
