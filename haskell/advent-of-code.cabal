@@ -20,9 +20,12 @@ library
   other-modules:       Year2017.Day01
                      , Year2017.Day02
                      , Year2017.Day03
+                     , Year2017.Day04
   build-depends:       base >= 4.7 && < 5
                      , array
+                     , containers
                      , safe
+                     , Unique
   default-language:    Haskell2010
 
 executable advent-of-code

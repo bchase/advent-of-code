@@ -1,0 +1,18 @@
+a:
+  - input: aa bb cc dd ee
+    output: "True"
+  - input: aa bb cc dd aa
+    output: "False"
+  - input: aa bb cc dd aaa
+    output: "True"
+b:
+  - input: abcde fghi
+    output: "True"
+  - input: abcde xyz ecdab
+    output: "False"
+  - input: a ab abc abd abf abj
+    output: "True"
+  - input: iiii oiii ooii oooi oooo
+    output: "True"
+  - input: oiii ioii iioi iiio
+    output: "False"
