@@ -1,4 +1,4 @@
-module Year2017.Day04 exposing (..)
+module DayWithoutUpdate exposing (..)
 
 import Types exposing (Flags, Input, Model, Mode(..), AB(..), Output)
 import Helpers

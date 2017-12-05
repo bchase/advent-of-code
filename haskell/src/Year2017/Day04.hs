@@ -13,8 +13,8 @@ day04 mode ab input = do
     Test -> return [ show . check ab $ input ]
     Run  -> return [ show . length . filter id . map (check ab) . lines $ input ]
   where
-    check ab =
-      case ab of
+    check p =
+      case p of
         A -> hasNoDuplicateTokens
         B -> hasNoAnagramTokens
 

@@ -1,14 +1,21 @@
-module Main exposing (..)
+module DayWithoutUpdate exposing (..)
 
 import Types exposing (Flags, Input, Model, Mode(..), AB(..), Output)
-import Helpers exposing (mainFor, return, fail)
+import Helpers as H
+
+
+-- solution
 
 
 solve : Input -> String
 solve { mode, ab, input } =
   case ( mode, ab ) of
     ( _, _ ) ->
-      (\str -> "received input" ++ str) input
+      (\str -> "received input: " ++ str) input
+
+
+
+-- Msg / update / main
 
 
 type Msg
@@ -19,9 +26,8 @@ update : Msg -> Input -> ( (), Cmd Msg )
 update msg input =
   case msg of
     Start ->
-      () ! [ return <| solve input ]
+      () ! [ H.return <| solve input ]
 
 
-main : Program Flags Model Msg
 main =
-  mainFor update Start
+  H.mainForUpdate update Start

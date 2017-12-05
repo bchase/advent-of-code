@@ -1,4 +1,4 @@
-module Helpers exposing (mainFor, return, fail)
+module Helpers exposing (defaultMain, mainForUpdate, return, fail)
 
 import Platform exposing (programWithFlags)
 import Task
@@ -7,16 +7,33 @@ import Ports exposing (exit)
 import Types exposing (Flags, Input, Model, Mode(..), AB(..), Output)
 
 
-type alias OuterUpdateFunc msg =
-  msg -> Input -> ( Model, Cmd msg )
+-- default implentation for `main` & `update`
 
 
-type alias InnerUpdateFunc msg =
-  msg -> Input -> ( (), Cmd msg )
+type DefaultMsg
+  = Start
 
 
-mainFor : InnerUpdateFunc msg -> msg -> Program Flags Model msg
-mainFor update startMsg =
+type alias Solver =
+  Input -> String
+
+
+defaultMain : Solver -> Program Flags Model DefaultMsg
+defaultMain solve =
+  mainForUpdate (defaultUpdate solve) Start
+
+
+defaultUpdate : Solver -> InnerUpdateFunc DefaultMsg
+defaultUpdate solve _ input =
+  () ! [ return <| solve input ]
+
+
+
+-- public helpers
+
+
+mainForUpdate : InnerUpdateFunc msg -> msg -> Program Flags Model msg
+mainForUpdate update startMsg =
   let
     init : Flags -> ( Model, Cmd msg )
     init flags =
@@ -29,16 +46,6 @@ mainFor update startMsg =
       }
 
 
-success : String -> Output
-success =
-  Output True
-
-
-failure : String -> Output
-failure =
-  Output False
-
-
 return : String -> Cmd msg
 return =
   exit << success
@@ -49,11 +56,47 @@ fail =
   exit << failure
 
 
+
+-- private helpers
+
+
+type alias OuterUpdateFunc msg =
+  msg -> Model -> ( Model, Cmd msg )
+
+
+type alias InnerUpdateFunc msg =
+  msg -> Input -> ( (), Cmd msg )
+
+
+success : String -> Output
+success =
+  Output True
+
+
+failure : String -> Output
+failure =
+  Output False
+
+
 cmd : msg -> Cmd msg
 cmd msg =
   msg
     |> Task.succeed
     |> Task.perform identity
+
+
+parseInputAnd : InnerUpdateFunc msg -> OuterUpdateFunc msg
+parseInputAnd update msg model =
+  case ( msg, model ) of
+    ( _, Err flags ) ->
+      model ! [ fail <| "Unable to parse flags" ++ toString flags ]
+
+    ( msg, Ok input ) ->
+      let
+        cmd =
+          Tuple.second <| update msg input
+      in
+        model ! [ cmd ]
 
 
 parseFlags : Flags -> Model
@@ -85,17 +128,3 @@ parseFlags ({ mode, ab, input } as flags) =
       Maybe.map3 (Input) mode_ ab_ (Just input)
   in
     Result.fromMaybe flags model
-
-
-parseInputAnd : (msg -> Input -> ( (), Cmd msg )) -> msg -> Model -> ( Model, Cmd msg )
-parseInputAnd update msg model =
-  case ( msg, model ) of
-    ( _, Err flags ) ->
-      model ! [ fail <| "Unable to parse flags" ++ toString flags ]
-
-    ( msg, Ok input ) ->
-      let
-        cmd =
-          Tuple.second <| update msg input
-      in
-        model ! [ cmd ]
