@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+
+const Elm = require('./elm.js')
+
+
+const buildFlags = function() {
+  const year  = process.argv[2] // TODO Elm.Year2017Day01
+  const day   = process.argv[3]
+  const ab    = process.argv[4]
+  const input = process.argv[5]
+
+  const allPresent = year && day && ab && input
+
+  if (!allPresent) {
+    console.log("USAGE: $ run YEAR DAY AB INPUT")
+    process.exit(1)
+  } else {
+    return { mode: 'run', ab, input }
+  }
+}
+
+const run = function(flags) {
+  Elm.Main.worker(flags).ports.exit.subscribe((output) => {
+    console.log(output.payload)
+    process.exit(output.success ? 0 : 1)
+  })
+}
+
+
+const flags = buildFlags()
+
+run(flags)

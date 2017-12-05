@@ -1,0 +1,4 @@
+#!/bin/sh
+
+
+elm make src/* --output bin/elm.js
