@@ -3,8 +3,8 @@ module Year2017.Day04 exposing (..)
 import String as S
 import List as L
 import List.Extra as L
-import Types exposing (Flags, Input, Model, Mode(..), AB(..), Output)
-import Helpers
+import Types exposing (Input, Mode(..), AB(..))
+import Helpers exposing (defaultMain)
 
 
 (.) =
@@ -44,4 +44,4 @@ solve { mode, ab, input } =
 
 
 main =
-  Helpers.defaultMain solve
+  defaultMain solve
