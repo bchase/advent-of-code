@@ -3,9 +3,9 @@
 const Elm = require('./elm.js')
 
 
-const buildFlags = function() {
-  const year  = process.argv[2] // TODO Elm.Year2017Day01
-  const day   = process.argv[3]
+const buildModuleStrsAndFlags = function() {
+  const year  = "Year" + process.argv[2]
+  const day   = "Day" + ("00" + process.argv[3]).substr(-2, 2)
   const ab    = process.argv[4]
   const input = process.argv[5]
 
@@ -15,18 +15,18 @@ const buildFlags = function() {
     console.log("USAGE: $ run YEAR DAY AB INPUT")
     process.exit(1)
   } else {
-    return { mode: 'run', ab, input }
+    return { year, day, flags: { mode: 'run', ab, input } }
   }
 }
 
-const run = function(flags) {
-  Elm.Main.worker(flags).ports.exit.subscribe((output) => {
+const run = function(year, day, flags) {
+  Elm[year][day].worker(flags).ports.exit.subscribe((output) => {
     console.log(output.payload)
     process.exit(output.success ? 0 : 1)
   })
 }
 
 
-const flags = buildFlags()
+const { year, day, flags } = buildModuleStrsAndFlags()
 
-run(flags)
+run(year, day, flags)
