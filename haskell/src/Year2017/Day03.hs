@@ -5,6 +5,8 @@ import           Data.Array (Array, array, assocs)
 import           Data.Maybe (fromJust)
 import           Control.Monad (join)
 
+import           Types
+
 -- [ [1]
 -- ]
 --
@@ -125,8 +127,9 @@ type Grid = Array Coords (Address, Val)
 day03parse :: String -> Int
 day03parse = read
 
-day03 :: String -> IO [String]
-day03 input = do
+day03 :: Mode -> AB -> String -> IO [String]
+-- day03 :: String -> IO [String]
+day03 _ _ input = do
   let val = day03parse input
       gridSize = ceiling . sqrt $ (fromIntegral val :: Double)
       grid = buildGridArray gridSize

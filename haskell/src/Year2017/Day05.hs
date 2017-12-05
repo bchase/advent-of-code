@@ -6,8 +6,9 @@ import           Types
 
 
 type Idx = Int
+type Val = Int
 type Step = Int
-type Maze = (Idx, Array Int Int, Step)
+type Maze = (Idx, Array Idx Val, Step)
 
 
 day05 :: Mode -> AB -> String -> IO [String]
