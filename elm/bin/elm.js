@@ -5977,7 +5977,7 @@ var _user$project$Ports$exit = _elm_lang$core$Native_Platform.outgoingPort(
 		return {success: v.success, payload: v.payload};
 	});
 
-var _user$project$Main$parseFlags = function (_p0) {
+var _user$project$Helpers$parseFlags = function (_p0) {
 	var _p1 = _p0;
 	var mode_ = function () {
 		var _p2 = _elm_lang$core$String$toUpper(_p1.mode);
@@ -6009,18 +6009,18 @@ var _user$project$Main$parseFlags = function (_p0) {
 		_elm_lang$core$Maybe$Just(_p1.input));
 	return A2(_elm_lang$core$Result$fromMaybe, _p1, model);
 };
-var _user$project$Main$cmd = function (msg) {
+var _user$project$Helpers$cmd = function (msg) {
 	return A2(
 		_elm_lang$core$Task$perform,
 		_elm_lang$core$Basics$identity,
 		_elm_lang$core$Task$succeed(msg));
 };
-var _user$project$Main$failure = _user$project$Types$Output(false);
-var _user$project$Main$fail = function (_p4) {
+var _user$project$Helpers$failure = _user$project$Types$Output(false);
+var _user$project$Helpers$fail = function (_p4) {
 	return _user$project$Ports$exit(
-		_user$project$Main$failure(_p4));
+		_user$project$Helpers$failure(_p4));
 };
-var _user$project$Main$parseInputAnd = F3(
+var _user$project$Helpers$parseInputAnd = F3(
 	function (update, msg, model) {
 		var _p5 = {ctor: '_Tuple2', _0: msg, _1: model};
 		if (_p5._1.ctor === 'Err') {
@@ -6029,7 +6029,7 @@ var _user$project$Main$parseInputAnd = F3(
 				model,
 				{
 					ctor: '::',
-					_0: _user$project$Main$fail(
+					_0: _user$project$Helpers$fail(
 						A2(
 							_elm_lang$core$Basics_ops['++'],
 							'Unable to parse flags',
@@ -6049,63 +6049,95 @@ var _user$project$Main$parseInputAnd = F3(
 				});
 		}
 	});
-var _user$project$Main$success = _user$project$Types$Output(true);
-var _user$project$Main$return = function (_p6) {
+var _user$project$Helpers$success = _user$project$Types$Output(true);
+var _user$project$Helpers$return = function (_p6) {
 	return _user$project$Ports$exit(
-		_user$project$Main$success(_p6));
+		_user$project$Helpers$success(_p6));
 };
-var _user$project$Main$dayXXa = function (input) {
-	return A2(_elm_lang$core$Basics_ops['++'], 'received input: ', input);
-};
-var _user$project$Main$solve = function (_p7) {
-	var _p8 = _p7;
-	var _p9 = {ctor: '_Tuple2', _0: _p8.mode, _1: _p8.ab};
-	if (_p9._0.ctor === 'Run') {
-		if (_p9._1.ctor === 'A') {
-			return _user$project$Main$dayXXa(_p8.input);
-		} else {
-			return 'Not implemented';
-		}
-	} else {
-		if (_p9._1.ctor === 'A') {
-			return 'Not implemented';
-		} else {
-			return 'Not implemented';
-		}
-	}
+var _user$project$Helpers$mainFor = F2(
+	function (update, startMsg) {
+		var init = function (flags) {
+			return A2(
+				_elm_lang$core$Platform_Cmd_ops['!'],
+				_user$project$Helpers$parseFlags(flags),
+				{
+					ctor: '::',
+					_0: _user$project$Helpers$cmd(startMsg),
+					_1: {ctor: '[]'}
+				});
+		};
+		return _elm_lang$core$Platform$programWithFlags(
+			{
+				init: init,
+				update: _user$project$Helpers$parseInputAnd(update),
+				subscriptions: function (_p7) {
+					return _elm_lang$core$Platform_Sub$none;
+				}
+			});
+	});
+
+var _user$project$Main$solve = function (_p0) {
+	var _p1 = _p0;
+	var _p2 = {ctor: '_Tuple2', _0: _p1.mode, _1: _p1.ab};
+	return function (str) {
+		return A2(_elm_lang$core$Basics_ops['++'], 'received input', str);
+	}(_p1.input);
 };
 var _user$project$Main$update = F2(
 	function (msg, input) {
-		var _p10 = msg;
+		var _p3 = msg;
 		return A2(
 			_elm_lang$core$Platform_Cmd_ops['!'],
 			{ctor: '_Tuple0'},
 			{
 				ctor: '::',
-				_0: _user$project$Main$return(
+				_0: _user$project$Helpers$return(
 					_user$project$Main$solve(input)),
 				_1: {ctor: '[]'}
 			});
 	});
 var _user$project$Main$Start = {ctor: 'Start'};
-var _user$project$Main$init = function (flags) {
-	return A2(
-		_elm_lang$core$Platform_Cmd_ops['!'],
-		_user$project$Main$parseFlags(flags),
-		{
-			ctor: '::',
-			_0: _user$project$Main$cmd(_user$project$Main$Start),
-			_1: {ctor: '[]'}
-		});
+var _user$project$Main$main = A2(_user$project$Helpers$mainFor, _user$project$Main$update, _user$project$Main$Start)(
+	A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (ab) {
+			return A2(
+				_elm_lang$core$Json_Decode$andThen,
+				function (input) {
+					return A2(
+						_elm_lang$core$Json_Decode$andThen,
+						function (mode) {
+							return _elm_lang$core$Json_Decode$succeed(
+								{ab: ab, input: input, mode: mode});
+						},
+						A2(_elm_lang$core$Json_Decode$field, 'mode', _elm_lang$core$Json_Decode$string));
+				},
+				A2(_elm_lang$core$Json_Decode$field, 'input', _elm_lang$core$Json_Decode$string));
+		},
+		A2(_elm_lang$core$Json_Decode$field, 'ab', _elm_lang$core$Json_Decode$string)));
+
+var _user$project$Year2017_Day04$solve = function (_p0) {
+	var _p1 = _p0;
+	var _p2 = {ctor: '_Tuple2', _0: _p1.mode, _1: _p1.ab};
+	return function (str) {
+		return A2(_elm_lang$core$Basics_ops['++'], 'received input: ', str);
+	}(_p1.input);
 };
-var _user$project$Main$main = _elm_lang$core$Platform$programWithFlags(
-	{
-		init: _user$project$Main$init,
-		update: _user$project$Main$parseInputAnd(_user$project$Main$update),
-		subscriptions: function (_p11) {
-			return _elm_lang$core$Platform_Sub$none;
-		}
-	})(
+var _user$project$Year2017_Day04$update = F2(
+	function (msg, input) {
+		var _p3 = msg;
+		return A2(
+			_elm_lang$core$Platform_Cmd_ops['!'],
+			{ctor: '_Tuple0'},
+			{
+				ctor: '::',
+				_0: _user$project$Helpers$return(
+					_user$project$Year2017_Day04$solve(input)),
+				_1: {ctor: '[]'}
+			});
+	});
+var _user$project$Year2017_Day04$Start = {ctor: 'Start'};
+var _user$project$Year2017_Day04$main = A2(_user$project$Helpers$mainFor, _user$project$Year2017_Day04$update, _user$project$Year2017_Day04$Start)(
 	A2(
 		_elm_lang$core$Json_Decode$andThen,
 		function (ab) {
@@ -6125,6 +6157,10 @@ var _user$project$Main$main = _elm_lang$core$Platform$programWithFlags(
 		A2(_elm_lang$core$Json_Decode$field, 'ab', _elm_lang$core$Json_Decode$string)));
 
 var Elm = {};
+Elm['Helpers'] = Elm['Helpers'] || {};
+if (typeof _user$project$Helpers$main !== 'undefined') {
+    _user$project$Helpers$main(Elm['Helpers'], 'Helpers', undefined);
+}
 Elm['Main'] = Elm['Main'] || {};
 if (typeof _user$project$Main$main !== 'undefined') {
     _user$project$Main$main(Elm['Main'], 'Main', undefined);
@@ -6136,6 +6172,11 @@ if (typeof _user$project$Ports$main !== 'undefined') {
 Elm['Types'] = Elm['Types'] || {};
 if (typeof _user$project$Types$main !== 'undefined') {
     _user$project$Types$main(Elm['Types'], 'Types', undefined);
+}
+Elm['Year2017'] = Elm['Year2017'] || {};
+Elm['Year2017']['Day04'] = Elm['Year2017']['Day04'] || {};
+if (typeof _user$project$Year2017_Day04$main !== 'undefined') {
+    _user$project$Year2017_Day04$main(Elm['Year2017']['Day04'], 'Year2017.Day04', undefined);
 }
 
 if (typeof define === "function" && define['amd'])
