@@ -1,4 +1,5 @@
 #!/bin/zsh
 
 
-elm make src/**/*.elm --output bin/elm.js
+echo `pwd`
+elm make ../src/**/*.elm --output elm.js
