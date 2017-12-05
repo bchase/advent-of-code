@@ -26,13 +26,13 @@ def test(lang, year, day, ab)
 
     [ i, %x[ ( cd ./#{lang}/bin && ./test #{year} #{day} #{ab} #{i.inspect} ) ].strip, o ]
   }
-  .map { |input, output, expected|
+  .map.with_index { |(input, output, expected), idx|
     actual, *rest = output.split
 
     (actual == expected).tap do |pass|
       unless pass
         puts
-        puts "FAILED -- DAY#{day}#{ab.upcase}"
+        puts "FAILED -- DAY#{day}#{ab.upcase}[#{idx}] "
         puts "  INPUT           #{input.inspect}"
         puts "  OUTPUT:EXPECTED #{expected.inspect}"
         puts "  OUTPUT:ACTUAL   #{actual.inspect}"
