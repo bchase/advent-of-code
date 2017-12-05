@@ -1,173 +1,176 @@
 module Year2017.Day03 ( day03 ) where
 
-import           Data.List  (find)
-import           Data.Array (Array, array, assocs)
-import           Data.Maybe (fromJust)
+-- import           Text.Printf   (printf)
+import           Data.List     (find, sortBy)
 import           Control.Monad (join)
 
 import           Types
-
--- [ [1]
--- ]
---
--- -- lower left
--- [ [4, 3] -- < new row
--- , [1, 2]
--- ]
--- --    ^ new column
---
--- -- upper right
--- [ [ 5,  4,  3 ]
--- , [ 6,  1,  2 ]
--- , [ 7,  8,  9 ] -- < new row
--- ]
--- --  ^ new column
---
--- -- lower left
--- [ [ 16, 15, 14, 13 ] -- < new row
--- , [  5,  4,  3, 12 ]
--- , [  6,  1,  2, 11 ]
--- , [  7,  8,  9, 10 ]
--- ]
--- --               ^ new column
---
--- -- upper right
--- [ [ 17, 16, 15, 14, 13 ]
--- , [ 18,  5,  4,  3, 12 ]
--- , [ 19,  6,  1,  2, 11 ]
--- , [ 20,  7,  8,  9, 10 ]
--- , [ 21, 22, 23, 24, 25 ] -- < new row
--- ]
--- --   ^ new column
---
--- -- [ [ 17, 16, 15, 14, 13 ] -- 4x4 4^2 EVEN
--- -- , [ 18,  5,  4,  3, 12 ] -- 2x2 2^2 EVEN
--- -- , [ 19,  6,  1,  2, 11 ] -- 1x1 1^2 ODD (ONE)
--- -- , [ 20,  7,  8,  9, 10 ] -- 3x3 3^2 ODD
--- -- , [ 21, 22, 23, 24, 25 ] -- 5%5 5^2 ODD
--- -- ]
---
--- -- [ [  4,  3,  2,  3,  4 ] -- 4x4 4^2 EVEN
--- -- , [  3,  2,  1,  2,  3 ] -- 2x2 2^2 EVEN
--- -- , [  2,  1,  0,  1,  2 ] -- 1x1 1^2 ODD (ONE)
--- -- , [  3,  2,  1,  2,  3 ] -- 3x3 3^2 ODD
--- -- , [  4,  3,  2,  3,  4 ] -- 5%5 5^2 ODD
--- -- ]
 
 
 type Coords = (Int, Int)
 type Address = Int
 type Val = Int
-type Grid = Array Coords (Address, Val)
+type Grid = [[Cell]]
+type Cell = (Coords,Address,Val)
 
-
--- day02b :: Val -> Grid -> Int
--- day02b _ [] = 0
--- day02b target grid =
---   let vals = join . map (\(y,row) -> map (\(x,val) -> ((x,y),(val,0))) . zip [0..] $ row) . zip [0..] $ grid
---       one = fromJust $ getCoords 1 grid
---       maxIdx = length grid
---       arr = array ((0,maxIdx),(0,maxIdx)) vals :: Grid
---    in sequentiallyFillInGridArrayUntilTarget maxIdx target arr
---   where
---     sequentiallyFillInGridArrayUntilTarget :: Int -> Val -> Grid -> Val
---     sequentiallyFillInGridArrayUntilTarget maxIdx target arr =
---
---       addressForNext = getCoords
-
-
-    -- writeValsUntil :: Int -> Val -> Grid -> Int
-    -- writeValsUntil maxIdx target arr = writeValsUntil' 1 maxIdx target arr
-    --
-    -- writeValsUntil' :: Int -> Address -> Val -> Grid -> Int
-    -- writeValsUntil' maxIdx 1 target arr = arr//[()]
-    -- writeValsUntil' maxIdx address target arr =
-
-
-  -- let vals = join . map (\(y,row) -> map (\(x,val) -> ((x,y),(val,0))) . zip [0..] $ row) . zip [0..] $ grid
-  --     one = fromJust $ getCoords 1 grid
-  --     maxIdx = length grid
-  --     arr = array ((0,maxIdx),(0,maxIdx)) vals :: Grid
-  --  in writeValsUntil target arr
-  -- where
-  --   writeValsUntil :: Val -> Grid -> Int
-  --   writeValsUntil target arr = writeValsUntil' 1 target arr
-  --
-  --   writeValsUntil' :: Address -> Val -> Grid -> Int
-  --   writeValsUntil' address target arr =
-
-
-
--- tagGrid :: Grid -> TaggedGrid
--- tagGrid []    = []
--- tagGrid [[]]  = []
--- tagGrid [[1]] = [[(1,0)]]
--- tagGrid grid@(row:_) =
---   let height = length grid
---       width  = length row
---   grid
--- [ [  3,  2,  3,  4 ]
--- , [  2,  1,  2,  3 ]
--- , [  1,  0,  1,  2 ]
--- , [  2,  1,  2,  3 ]
--- ]
---
--- [ [  4,  3,  2,  3,  4 ]
--- , [  3,  2,  1,  2,  3 ]
--- , [  2,  1,  0,  1,  2 ]
--- , [  3,  2,  1,  2,  3 ]
--- , [  4,  3,  2,  3,  4 ]
--- ]
-
-
--- day03a, day03b :: Grid -> Int
--- day03a :: Int -> Int
--- day03a _ = 1
-
-day03parse :: String -> Int
-day03parse = read
 
 day03 :: Mode -> AB -> String -> IO [String]
--- day03 :: String -> IO [String]
-day03 _ _ input = do
-  let val = day03parse input
-      gridSize = ceiling . sqrt $ (fromIntegral val :: Double)
-      grid = buildGridArray gridSize
-      (oneX,oneY) = fromJust $ getCoordsForAddress 1 grid
-      (locX,locY) = fromJust $ getCoordsForAddress val grid
-      dist = (abs (oneX - locX)) + (abs (oneY - locY))
-  -- mapM_ print grid >> putStrLn input
-  return . map show $ [ dist ]
+day03 _ _ _ = do
+  -- let val = read input
+      -- gridSize = ceiling . sqrt $ (fromIntegral val :: Double)
+      -- grid = buildGrid gridSize
+      -- (Just (oneX,oneY)) = getCoordsForAddress 1 grid
+      -- (Just (locX,locY)) = getCoordsForAddress val grid
+      -- dist = (abs (oneX - locX)) + (abs (oneY - locY))
 
-getCoordsForAddress :: Address -> Grid -> Maybe (Int, Int)
-getCoordsForAddress addr = fmap fst . find (((==) addr) . fst . snd) . assocs
+  let gridSize = ceiling . sqrt $ (368078 :: Double)
+      grid = buildGrid gridSize
+      (b,_) = populateGridAndFindFirstGreaterThan 368078 grid
 
--- xs = join [[xp,xm] | xp <- x+1, xm <- x-1]
--- yx = join [[yp,ym] | yp <- y+1, ym <- y-1]
--- xy = [(x',y') | x' <- xs, y' <- yx, x' >= 0 && x' <= max' && y' >= 0 && y' <= max' ]
--- getValForCoords :: (Coords, Coords) -> Coords -> Grid -> Maybe (Int, Int)
--- getValForCoords (min',max') val grid = undefined
+  -- printCells cs
+  -- print cs
+  -- print b
+  return . map show $ [ b ]
 
-buildGridArray :: Int -> Grid
-buildGridArray size =
-  let grid = buildListGrid size
-      maxIdx = length grid - 1
-      vals = join . map (\(y,row) -> map (\(x,a) -> ((x,y),(a,0))) . zip [0..] $ row) . zip [0..] $ grid
-   in array ((0,0),(maxIdx,maxIdx)) vals
+
+buildGrid :: Int -> Grid
+buildGrid size =
+  grid . until (\g -> gridSize g >= size) incPreGrid $ [[1]]
   where
-    buildListGrid :: Int -> [[Int]]
-    buildListGrid square =
-      snd . foldr (\_ (curr, grid) -> (succ curr, buildListGrid' curr grid)) (1, [[1]]) $ [1..square]
+    grid :: [[Int]] -> Grid
+    grid g =
+      map (\(y,r) -> map (\(x,a) -> ((x,y),a,0)) . zip [0..] $ r) . zip [0..] $ g
 
-    buildListGrid' :: Int -> [[Int]]-> [[Int]]
-    buildListGrid' 1 grid = grid
-    buildListGrid' curr grid = do
-      let from = succ ((pred curr) ^ (2 :: Int))
-          line = reverse . drop curr $ [(pred from)..(curr ^ (2 :: Int))]
-      case even curr of
-        False -> do -- from ODD TO EVEN: unshift to first-to-last, then push new list
-          let grid' = snd . foldl (\(n, nss) ns -> (succ n, nss ++ [n:ns])) (from, []) $ grid
-          grid' ++ [reverse line]
-        True -> do -- from EVEN to ODD: push to last-to-first, then unshift new list
-          let grid' = snd . foldr (\ns (n, nss) -> (succ n, nss ++ [ns ++ [n]])) (from, []) $ grid
-          line:grid'
+    gridSize :: [[a]] -> Int
+    gridSize (row:_) = length row
+    gridSize _ = 0
+
+    incPreGrid :: [[Int]] -> [[Int]]
+    incPreGrid g = addRow . addCols $ g
+      where
+        addCols =
+          if odd s then reverse . map cf . reverse . zip cs
+                   else map cf . zip cs
+        addRow g' = rf (r,g')
+        cf = if odd s then push else unshift
+        rf = if odd s then unshift else push
+        unshift (a,as) = a:as
+        push (a,as) = as ++ [a]
+        s  = gridSize g
+        sq = flip (^) (2 :: Int)
+        ns = [((sq s)+1)..(sq (s+1))]
+        cs = (if odd s then reverse else id) . take s $ ns
+        rs = drop s $ ns
+        r  = if even s then rs else reverse rs
+
+-- getCoordsForAddress :: Address -> Grid -> Maybe Coords
+-- getCoordsForAddress addr =
+--   fmap (\(c,_,_) -> c) . find (\(_,a,_) -> a == addr) . join
+
+populateGridAndFindFirstGreaterThan :: Val -> Grid -> (Val, [Cell])
+populateGridAndFindFirstGreaterThan target grid =
+  let cells = foldr populate (join grid) addrs
+      cells' = sortBy cellValue cells
+      (Just cell) = find (valGT target) cells'
+   in (getVal cell, cells')
+  where
+    getAddr (_,a,_) = a
+    getVal (_,_,v) = v
+    cellValue c1 c2 = compare (getVal c1) (getVal c2)
+    valGT t c = getVal c > t
+    addrs = reverse [1 .. maxAddr]
+
+    maxAddr :: Int
+    maxAddr =
+      case grid of
+        (row:_) -> length row
+        _ -> 0
+
+    populate :: Address -> [Cell] -> [Cell]
+    populate addr cells =
+      let (c,a,_) = findByAddr addr cells
+          neighborVals = map getVal . neighbors c $ cells
+          val' = if a == 1 then 1 else sum neighborVals
+          cell' = (c,a,val')
+       in updateCell cell' cells
+      where
+        updateCell :: Cell -> [Cell] -> [Cell]
+        updateCell c@(_,a,_) cs =
+          let cs' = filter (not . ((==) a) . getAddr) cs
+           in c:cs'
+
+    findByAddr :: Address -> [Cell] -> Cell
+    findByAddr addr cells =
+      let (Just cell) = find (\(_,a,_) -> a == addr) cells
+       in cell
+
+    neighbors :: Coords -> [Cell] -> [Cell]
+    neighbors c@(x,y) cells =
+      let xs  = [x-1,x,x+1]
+          ys  = [y-1,y,y+1]
+          xys = [(x',y') | x' <- xs, y' <- ys, (x',y') /= c]
+       in filter (\(xy,_,_) -> xy `elem` xys) cells
+
+
+-- printCells :: [Cell] -> IO ()
+-- printCells = mapM_ id . snd . foldl f (0, []) . reverse . sortBy xy
+--   where
+--     xy :: Cell -> Cell -> Ordering
+--     xy ((x1,y1),_,_) ((x2,y2),_,_) = compare (y1,x1) (y2,x2)
+--
+--     f :: (Int, [IO ()]) -> Cell -> (Int, [IO ()])
+--     f (y,ps) ((_,y'),_,v) =
+--       -- let p = if y == y' then pr else pn
+--       let p = if y' == y then pr else pn
+--        in (y',(p v):ps)
+--     pr :: Int -> IO ()
+--     pr = printf "%03d "
+--     pn :: Int -> IO ()
+--     pn i = pr i >> putStrLn "\n"
+-- -- printGrid :: Grid -> IO ()
+-- -- printGrid = mapM_ id . snd . foldl f (0, []) . reverse . sortBy xy . join
+-- --   where
+-- --     xy :: Cell -> Cell -> Ordering
+-- --     xy ((x1,y1),_,_) ((x2,y2),_,_) = compare (y1,x1) (y2,x2)
+-- --
+-- --     f :: (Int, [IO ()]) -> Cell -> (Int, [IO ()])
+-- --     f (y,ps) ((_,y'),a,_) =
+-- --       -- let p = if y == y' then pr else pn
+-- --       let p = if y' == y then pr else pn
+-- --        in (y',(p a):ps)
+-- --     pr :: Int -> IO ()
+-- --     pr = printf "%02d "
+-- --     pn :: Int -> IO ()
+-- --     pn i = pr i >> putStrLn "\n"
+
+
+
+--      from 1 to 2 -- size is odd
+-- 4 3  2. unshift reverse row
+-- 1 2  1. push col bot-to-top
+--
+--        from 2 to 3 -- size is even
+-- 5 4 3  1. unshift col top-to-bot
+-- 6 1 2
+-- 7 8 9  2. push row
+--
+--              from 3 to 4 -- size is odd
+-- 16 15 14 13  2. unshift reverse row
+--  5  4  3 12
+--  6  1  2 11
+--  7  8  9 10  1. push col bot-to-top
+--
+-- 17 16 15 14 13
+-- 18  5  4  3 12
+-- 19  6  1  2 11
+-- 20  7  8  9 10
+-- 21 22 23 24 25
+
+--    y 0  1  2  3  4
+-- x
+-- 0   16 15 14 13
+-- 1    5  4  3 12
+-- 2    6  1  2 11
+-- 3    7  8  9 10
+-- 4
+
