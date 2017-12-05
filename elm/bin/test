@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+
+const Elm = require('./elm.js')
+
+
+const buildModuleStrsAndFlags = function() {
+  const year  = "Year" + process.argv[2]
+  const day   = "Day" + ("00" + process.argv[3]).substr(-2, 2)
+  const ab    = process.argv[4]
+  const input = process.argv[5]
+
+  const allPresent = year && day && ab && input
+
+  if (!allPresent) {
+    console.log("USAGE: $ test YEAR DAY AB INPUT")
+    process.exit(1)
+  } else {
+    return { year, day, flags: { mode: 'test', ab, input } }
+  }
+}
+
+const test = function(year, day, flags) {
+  Elm[year][day].worker(flags).ports.exit.subscribe((output) => {
+    console.log(output.payload)
+    process.exit(output.success ? 0 : 1)
+  })
+}
+
+
+const { year, day, flags } = buildModuleStrsAndFlags()
+
+test(year, day, flags)
