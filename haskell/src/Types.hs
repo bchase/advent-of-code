@@ -4,8 +4,8 @@ module Types
   ) where
 
 
-data Mode = Run | Test deriving (Show)
-data AB = A | B deriving (Show)
+data Mode = Run | Test deriving (Eq, Show)
+data AB = A | B deriving (Eq, Show)
 
 instance Read Mode where
   readsPrec _ str =

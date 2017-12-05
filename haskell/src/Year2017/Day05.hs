@@ -7,40 +7,38 @@ import           Types
 
 type Idx = Int
 type Step = Int
-type MazePos = (Idx, [Int])
 type Maze = (Idx, Array Int Int, Step)
 
 
 day05 :: Mode -> AB -> String -> IO [String]
-day05 mode _ input = do
-  case mode of
-    Test -> return [ show . testA $ input ]
-    Run  -> return [ show . runA $ input ]
+day05 Test ab = return . return . test ab
+day05 Run  ab = return . return . show . (\(_,_,s) -> s) . run ab
+
+test :: AB -> String -> String
+test A = show . (\(i,a,_) -> (i, elems a)) . travelUsing A . buildMazePos
+test B = show . (\(_,a,s) -> (elems a, s)) . run B
+
+run :: AB -> String -> Maze
+run ab = until outOfBounds (travelUsing ab) . buildMaze
 
 
-runA :: String -> Int
-runA = (\(_,_,s) -> s) . until outOfBounds travel . buildMaze
-  where
-    buildMaze :: String -> Maze
-    buildMaze str =
-      let ns = zip [0..] . map read . words $ str
-       in (0, array (0, length ns - 1) ns, 0)
+buildMaze :: String -> Maze
+buildMaze str =
+  let ns = zip [0..] . map read . words $ str
+   in (0, array (0, length ns - 1) ns, 0)
 
-testA :: String -> MazePos
-testA =
-  (\(i,a,_) -> (i, elems a)) . travel . buildMazePos
-    where
-      buildMazePos :: String -> Maze
-      buildMazePos str =
-        let (idx,ns) = read str
-         in (idx, array (0, length ns - 1) (zip [0..] ns), 0)
+buildMazePos :: String -> Maze
+buildMazePos str =
+  let (idx,ns) = read str
+   in (idx, array (0, length ns - 1) (zip [0..] ns), 0)
 
-
-travel :: Maze -> Maze
-travel (from,arr,step) =
+travelUsing :: AB -> Maze -> Maze
+travelUsing ab (from,arr,step) =
   let val = arr ! from
-      arr' = arr//[(from, val+1)]
       to = from + val
+      offset = to - from
+      val' = if offset>=3 && ab == B then -1 else 1
+      arr' = arr//[(from, val + val')]
    in (to, arr', step+1)
 
 outOfBounds :: Maze -> Bool
