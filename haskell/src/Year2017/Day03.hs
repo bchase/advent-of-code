@@ -1,7 +1,7 @@
 module Year2017.Day03 ( day03 ) where
 
--- import           Text.Printf   (printf)
-import           Data.List     (find, sortBy)
+import           Data.List     (find)
+import           Data.Maybe    (fromJust)
 import           Control.Monad (join)
 
 import           Types
@@ -10,42 +10,64 @@ import           Types
 type Coords = (Int, Int)
 type Address = Int
 type Val = Int
-type Grid = [[Cell]]
-type Cell = (Coords,Address,Val)
+type Grid = ([Cell], Size)
+type Cell = (Coords, Address, Val)
+type Size = Int
 
 
 day03 :: Mode -> AB -> String -> IO [String]
-day03 _ _ _ = do
-  -- let val = read input
-      -- gridSize = ceiling . sqrt $ (fromIntegral val :: Double)
-      -- grid = buildGrid gridSize
-      -- (Just (oneX,oneY)) = getCoordsForAddress 1 grid
-      -- (Just (locX,locY)) = getCoordsForAddress val grid
-      -- dist = (abs (oneX - locX)) + (abs (oneY - locY))
+day03 mode ab input = do
+  case mode of
+    Run -> error "NOTIMPL"
+      --
+      -- let size = ceiling . sqrt $ (368078 :: Double)
+      --     size = (+1) . ceiling . sqrt $ (fromIntegral 368078 :: Double)
+      --     grid = buildGrid size
+      --     grid' = populateGrid grid
+      --     (Just cell) = find (valGT target) grid'
+      -- return . map show $ [ b ]
+    Test -> do
+      let addr = read input
+          size = (+2) . ceiling . sqrt $ (fromIntegral addr :: Double)
+          grid = buildGrid size
+      case ab of
+        A -> return . map show $ [ fromJust $ getDistanceBetween 1 addr grid ]
+        B -> return . map show $ [ fromJust $ getCellValInPopulatedGrid addr grid  ]
 
-  let gridSize = ceiling . sqrt $ (368078 :: Double)
-      grid = buildGrid gridSize
-      (b,_) = populateGridAndFindFirstGreaterThan 368078 grid
 
-  -- printCells cs
-  -- print cs
-  -- print b
-  return . map show $ [ b ]
+getDistanceBetween :: Address -> Address -> Grid -> Maybe Int
+getDistanceBetween a1 a2 g = do
+  (oneX,oneY) <- getCoordsForAddress a1 g
+  (locX,locY) <- getCoordsForAddress a2 g
+  return $ abs (oneX - locX) + (abs (oneY - locY))
 
+getCellValInPopulatedGrid :: Address -> Grid -> Maybe Val
+getCellValInPopulatedGrid addr grid =
+  let (cells,_) = populateGrid grid
+   in fmap getVal . find (hasAddr addr) $ cells
+
+
+getCoords :: Cell -> Coords
+getCoords (xy,_,_) = xy
+getAddr :: Cell -> Address
+getAddr (_,a,_) = a
+getVal :: Cell -> Val
+getVal (_,_,v) = v
+hasAddr :: Address -> Cell -> Bool
+hasAddr addr = ((==) addr) . getAddr
 
 buildGrid :: Int -> Grid
 buildGrid size =
-  grid . until (\g -> gridSize g >= size) incPreGrid $ [[1]]
+  (grid . until (\g -> gridSize g >= size) incPreGrid $ [[1]], size)
   where
-    grid :: [[Int]] -> Grid
-    grid g =
-      map (\(y,r) -> map (\(x,a) -> ((x,y),a,0)) . zip [0..] $ r) . zip [0..] $ g
+    grid :: [[Address]] -> [Cell]
+    grid = join . map (\(y,r) -> map (\(x,a) -> ((x,y),a,0)) . zip [0..] $ r) . zip [0..]
 
     gridSize :: [[a]] -> Int
     gridSize (row:_) = length row
     gridSize _ = 0
 
-    incPreGrid :: [[Int]] -> [[Int]]
+    incPreGrid :: [[Address]] -> [[Address]]
     incPreGrid g = addRow . addCols $ g
       where
         addCols =
@@ -63,53 +85,31 @@ buildGrid size =
         rs = drop s $ ns
         r  = if even s then rs else reverse rs
 
--- getCoordsForAddress :: Address -> Grid -> Maybe Coords
--- getCoordsForAddress addr =
---   fmap (\(c,_,_) -> c) . find (\(_,a,_) -> a == addr) . join
+getCoordsForAddress :: Address -> Grid -> Maybe Coords
+getCoordsForAddress addr (grid,_)=
+  fmap getCoords . find (hasAddr addr) $ grid
 
-populateGridAndFindFirstGreaterThan :: Val -> Grid -> (Val, [Cell])
-populateGridAndFindFirstGreaterThan target grid =
-  let cells = foldr populate (join grid) addrs
-      cells' = sortBy cellValue cells
-      (Just cell) = find (valGT target) cells'
-   in (getVal cell, cells')
+populateGrid :: Grid -> Grid
+populateGrid grid@(_,size) =
+  let addrs = reverse [1 .. size]
+   in (foldr populate (fst grid) $ addrs, size)
   where
-    getAddr (_,a,_) = a
-    getVal (_,_,v) = v
-    cellValue c1 c2 = compare (getVal c1) (getVal c2)
-    valGT t c = getVal c > t
-    addrs = reverse [1 .. maxAddr]
-
-    maxAddr :: Int
-    maxAddr =
-      case grid of
-        (row:_) -> length row
-        _ -> 0
-
     populate :: Address -> [Cell] -> [Cell]
     populate addr cells =
-      let (c,a,_) = findByAddr addr cells
-          neighborVals = map getVal . neighbors c $ cells
-          val' = if a == 1 then 1 else sum neighborVals
-          cell' = (c,a,val')
+      let (Just (xy,a,_)) =find (((==) addr) . getAddr) cells
+          neighborVals = map getVal . neighbors xy $ cells
+          cell' = (xy, a, if a == 1 then 1 else sum neighborVals)
        in updateCell cell' cells
       where
         updateCell :: Cell -> [Cell] -> [Cell]
         updateCell c@(_,a,_) cs =
-          let cs' = filter (not . ((==) a) . getAddr) cs
-           in c:cs'
+          c:(filter (not . hasAddr a) $ cs)
 
-    findByAddr :: Address -> [Cell] -> Cell
-    findByAddr addr cells =
-      let (Just cell) = find (\(_,a,_) -> a == addr) cells
-       in cell
-
-    neighbors :: Coords -> [Cell] -> [Cell]
-    neighbors c@(x,y) cells =
-      let xs  = [x-1,x,x+1]
-          ys  = [y-1,y,y+1]
-          xys = [(x',y') | x' <- xs, y' <- ys, (x',y') /= c]
-       in filter (\(xy,_,_) -> xy `elem` xys) cells
+        neighbors :: Coords -> [Cell] -> [Cell]
+        neighbors c@(x,y) cs =
+          let (xs,ys) = ( [x-1,x,x+1], [y-1,y,y+1] )
+              xys = [(x',y') | x' <- xs, y' <- ys, (x',y') /= c]
+           in filter (flip elem xys . getCoords) cs
 
 
 -- printCells :: [Cell] -> IO ()
@@ -127,50 +127,19 @@ populateGridAndFindFirstGreaterThan target grid =
 --     pr = printf "%03d "
 --     pn :: Int -> IO ()
 --     pn i = pr i >> putStrLn "\n"
--- -- printGrid :: Grid -> IO ()
--- -- printGrid = mapM_ id . snd . foldl f (0, []) . reverse . sortBy xy . join
--- --   where
--- --     xy :: Cell -> Cell -> Ordering
--- --     xy ((x1,y1),_,_) ((x2,y2),_,_) = compare (y1,x1) (y2,x2)
--- --
--- --     f :: (Int, [IO ()]) -> Cell -> (Int, [IO ()])
--- --     f (y,ps) ((_,y'),a,_) =
--- --       -- let p = if y == y' then pr else pn
--- --       let p = if y' == y then pr else pn
--- --        in (y',(p a):ps)
--- --     pr :: Int -> IO ()
--- --     pr = printf "%02d "
--- --     pn :: Int -> IO ()
--- --     pn i = pr i >> putStrLn "\n"
-
-
-
---      from 1 to 2 -- size is odd
--- 4 3  2. unshift reverse row
--- 1 2  1. push col bot-to-top
 --
---        from 2 to 3 -- size is even
--- 5 4 3  1. unshift col top-to-bot
--- 6 1 2
--- 7 8 9  2. push row
+-- printGrid :: Grid -> IO ()
+-- printGrid = mapM_ id . snd . foldl f (0, []) . reverse . sortBy xy . join
+--   where
+--     xy :: Cell -> Cell -> Ordering
+--     xy ((x1,y1),_,_) ((x2,y2),_,_) = compare (y1,x1) (y2,x2)
 --
---              from 3 to 4 -- size is odd
--- 16 15 14 13  2. unshift reverse row
---  5  4  3 12
---  6  1  2 11
---  7  8  9 10  1. push col bot-to-top
---
--- 17 16 15 14 13
--- 18  5  4  3 12
--- 19  6  1  2 11
--- 20  7  8  9 10
--- 21 22 23 24 25
-
---    y 0  1  2  3  4
--- x
--- 0   16 15 14 13
--- 1    5  4  3 12
--- 2    6  1  2 11
--- 3    7  8  9 10
--- 4
-
+--     f :: (Int, [IO ()]) -> Cell -> (Int, [IO ()])
+--     f (y,ps) ((_,y'),a,_) =
+--       -- let p = if y == y' then pr else pn
+--       let p = if y' == y then pr else pn
+--        in (y',(p a):ps)
+--     pr :: Int -> IO ()
+--     pr = printf "%02d "
+--     pn :: Int -> IO ()
+--     pn i = pr i >> putStrLn "\n"
