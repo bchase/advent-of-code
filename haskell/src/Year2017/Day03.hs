@@ -23,16 +23,11 @@ day03 mode ab input = return [ show . fromJust $ result ]
     size = ceiling . sqrt $ (fromIntegral addr :: Double)
 
     result =
-      case mode of
-        Run -> do
-          case ab of
-            A -> getDistanceBetween 1 addr . buildGrid $ size
-            B -> findFirstGreaterValInPopulatedGrid addr . buildGrid $ size `div` 6
-        Test -> do
-          let grid = buildGrid (size+2)
-          case ab of
-            A -> getDistanceBetween 1 addr grid
-            B -> fmap getVal . findAddrInPopulatedGrid addr $ grid
+      case (mode, ab) of
+        (Test, A) -> getDistanceBetween 1 addr . buildGrid $ size
+        (Run,  A) -> getDistanceBetween 1 addr . buildGrid $ size
+        (Test, B) -> fmap getVal . findAddrInPopulatedGrid addr . buildGrid $ size+2
+        (Run,  B) -> findFirstGreaterValInPopulatedGrid addr . buildGrid $ size `div` 6
 
 
 getDistanceBetween :: Address -> Address -> Grid -> Maybe Int
@@ -82,7 +77,7 @@ buildGrid size =
         mapColValToRow f = if isOdd then reverse . map f . reverse else map f
 
         (newCol, newRow) = (order . take size' $ addrs, order . drop size' $ addrs)
-        addrs = [((sq size')+1)..(sq (size'+1))]
+        addrs = [ sq size' + 1 .. sq (size'+1) ]
         order = if isOdd then reverse else id
 
         sq = flip (^) (2 :: Int)
