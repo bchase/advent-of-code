@@ -7,14 +7,6 @@ import           Control.Monad (join)
 import           Types
 
 
-type Coords = (Int, Int)
-type Address = Int
-type Val = Int
-type Grid = ([Cell], Size)
-type Cell = (Coords, Address, Val)
-type Size = Int
-
-
 day03 :: Mode -> AB -> String -> IO [String]
 day03 mode ab input = do
   case mode of
@@ -33,6 +25,16 @@ day03 mode ab input = do
       case ab of
         A -> return . map show $ [ fromJust $ getDistanceBetween 1 addr grid ]
         B -> return . map show $ [ fromJust $ getCellValInPopulatedGrid addr grid  ]
+        -- TODO findCellValInPopulatedGrid (Cell -> Bool)
+
+
+type Grid = ([Cell], Size)
+type Cell = (Coords, Address, Val)
+
+type Coords = (Int, Int)
+type Address = Int
+type Val = Int
+type Size = Int
 
 
 getDistanceBetween :: Address -> Address -> Grid -> Maybe Int
@@ -70,20 +72,21 @@ buildGrid size =
     incPreGrid :: [[Address]] -> [[Address]]
     incPreGrid g = addRow . addCols $ g
       where
-        addCols =
-          if odd s then reverse . map cf . reverse . zip cs
-                   else map cf . zip cs
-        addRow g' = rf (r,g')
-        cf = if odd s then push else unshift
-        rf = if odd s then unshift else push
+        size' = gridSize g
+        isOdd = odd size'
+
+        addRow rows = (if isOdd then unshift else push) (newRow,rows)
+
+        addCols = mapColValToRow (if isOdd then push else unshift) . zip newCol
+        mapColValToRow f = if isOdd then reverse . map f . reverse else map f
+
+        (newCol, newRow) = (order . take size' $ addrs, order . drop size' $ addrs)
+        addrs = [((sq size')+1)..(sq (size'+1))]
+        order = if isOdd then reverse else id
+
+        sq = flip (^) (2 :: Int)
         unshift (a,as) = a:as
         push (a,as) = as ++ [a]
-        s  = gridSize g
-        sq = flip (^) (2 :: Int)
-        ns = [((sq s)+1)..(sq (s+1))]
-        cs = (if odd s then reverse else id) . take s $ ns
-        rs = drop s $ ns
-        r  = if even s then rs else reverse rs
 
 getCoordsForAddress :: Address -> Grid -> Maybe Coords
 getCoordsForAddress addr (grid,_)=
