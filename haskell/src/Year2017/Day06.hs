@@ -13,16 +13,26 @@ type Val = Int
 
 
 day06 :: Mode -> AB -> String -> IO [String]
-day06 mode ab input =
-  case (mode, ab) of
-    (Test, A) -> do
-      return [ show . map snd . redistribute . parse $ input ]
-    _ -> error "NOTIMPL"
+day06 mode ab input = return $ [ result ]
+  where
+    result =
+      case (mode, ab) of
+        (Test, A) -> show . map snd . redistribute . parse $ input
+        (Run,  A) -> do
+          -- let mb = parse "[0,2,7,0]"
+          let mb = parse "[0,5,10,0,11,14,13,4,11,8,8,7,1,4,12,11]"
+          show . length . snd . until stateHasBeenSeenBefore redistributeAndTrack $ (mb, [])
+
+        _ -> error "NOTIMPL"
 
 
 parse :: String -> MemoryBank
 parse = zip [0..] . read
 
+stateHasBeenSeenBefore :: (MemoryBank, [MemoryBank]) -> Bool
+stateHasBeenSeenBefore (mb, mbs) = mb `elem` mbs
+redistributeAndTrack :: (MemoryBank, [MemoryBank]) -> (MemoryBank, [MemoryBank])
+redistributeAndTrack (mb, mbs) = let mb' = redistribute mb in (mb', mb:mbs)
 
 redistribute :: MemoryBank -> MemoryBank
 redistribute bank =
@@ -34,7 +44,8 @@ redistribute bank =
       let max' = maximum . map snd $ mb
           blks = filter (flip (==) max' . snd) mb
       case blks of
-        [(idx,val)] -> (idx, 1, val-1)
+        -- [(idx,val)] -> (idx, 1, val-1)
+        [(idx,val)] -> (idx, 0, val)
         (idx,val):_ -> (idx, 0, val)
         _           -> error "EMPTY-MemoryBank"
 
@@ -50,7 +61,8 @@ redistribute bank =
     incNextBlockVal :: (Idx, Int, MemoryBank, Idx) -> (Idx, Int, MemoryBank, Idx)
     incNextBlockVal (idx, dist, mb, ignore) = do
       let (idx',val) = nextBlock (idx+1) mb
-          (mb', dist') = if idx' == ignore then (mb, dist) else (setValAtIdx idx' (val+1) mb, dist-1)
+          -- (mb', dist') = if idx' == ignore then (mb, dist) else (setValAtIdx idx' (val+1) mb, dist-1)
+          (mb', dist') = if False then (mb, dist) else (setValAtIdx idx' (val+1) mb, dist-1)
        in (idx', dist', mb', ignore)
 
     nextBlock :: Idx -> MemoryBank -> Block
