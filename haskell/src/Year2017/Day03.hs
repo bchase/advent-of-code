@@ -7,27 +7,6 @@ import           Control.Monad (join)
 import           Types
 
 
-day03 :: Mode -> AB -> String -> IO [String]
-day03 mode ab input = return [ show result ]
-  where
-    result =
-      case mode of
-        Run -> do
-          let addr = read input
-              sizeA = ceiling . sqrt $ (fromIntegral addr :: Double)
-              sizeB = sizeA `div` 6
-          case ab of
-            A -> fromJust . getDistanceBetween 1 addr . buildGrid $ sizeA
-            B -> fromJust . find (flip (>=) addr) . sort . map getVal . fst . populateGrid . buildGrid $ sizeB
-        Test -> do
-          let addr = read input
-              size = (+2) . ceiling . sqrt $ (fromIntegral addr :: Double)
-              grid = buildGrid size
-          case ab of
-            A -> fromJust $ getDistanceBetween 1 addr grid
-            B -> fromJust $ fmap getVal . find (hasAddr addr) . fst . populateGrid $ grid
-
-
 type Grid = ([Cell], Size)
 type Cell = (Coords, Address, Val)
 
@@ -37,11 +16,38 @@ type Val = Int
 type Size = Int
 
 
+day03 :: Mode -> AB -> String -> IO [String]
+day03 mode ab input = return [ show . fromJust $ result ]
+  where
+    addr = read input
+    size = ceiling . sqrt $ (fromIntegral addr :: Double)
+
+    result =
+      case mode of
+        Run -> do
+          case ab of
+            A -> getDistanceBetween 1 addr . buildGrid $ size
+            B -> findFirstGreaterValInPopulatedGrid addr . buildGrid $ size `div` 6
+        Test -> do
+          let grid = buildGrid (size+2)
+          case ab of
+            A -> getDistanceBetween 1 addr grid
+            B -> fmap getVal . findAddrInPopulatedGrid addr $ grid
+
+
 getDistanceBetween :: Address -> Address -> Grid -> Maybe Int
 getDistanceBetween a1 a2 g = do
   (oneX,oneY) <- getCoordsForAddress a1 g
   (locX,locY) <- getCoordsForAddress a2 g
   return $ abs (oneX - locX) + (abs (oneY - locY))
+
+findAddrInPopulatedGrid :: Address -> Grid -> Maybe Cell
+findAddrInPopulatedGrid addr =
+  find (hasAddr addr) . fst . populateGrid
+
+findFirstGreaterValInPopulatedGrid :: Val -> Grid -> Maybe Val
+findFirstGreaterValInPopulatedGrid val =
+  find (flip (>) val) . sort . map getVal . fst . populateGrid
 
 
 getCoords :: Cell -> Coords
@@ -93,7 +99,7 @@ populateGrid grid@(_,size) =
   where
     populate :: Address -> [Cell] -> [Cell]
     populate addr cells =
-      let (Just (xy,a,_)) =find (((==) addr) . getAddr) cells
+      let (Just (xy,a,_)) = find (((==) addr) . getAddr) cells
           neighborVals = map getVal . neighbors xy $ cells
           cell' = (xy, a, if a == 1 then 1 else sum neighborVals)
        in updateCell cell' cells
