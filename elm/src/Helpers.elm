@@ -1,5 +1,7 @@
-module Helpers exposing (defaultMain, mainForUpdate, return, fail)
+module Helpers exposing (defaultMain, mainForUpdate, lines_, return, fail)
 
+import String as S
+import List as L
 import Platform exposing (programWithFlags)
 import Task
 import Json.Decode
@@ -30,6 +32,11 @@ defaultUpdate solve _ input =
 
 
 -- public helpers
+
+
+lines_ : String -> List String
+lines_ =
+  L.filter (\p -> p /= "") << S.split "\\n"
 
 
 mainForUpdate : InnerUpdateFunc msg -> msg -> Program Flags Model msg

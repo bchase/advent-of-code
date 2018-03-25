@@ -4,51 +4,29 @@ import String as S
 import List as L
 import List.Extra as L
 import Types exposing (Input, Mode(..), AB(..))
-import Helpers exposing (defaultMain)
-
-
-noDuplicateTokens : String -> Bool
-noDuplicateTokens =
-  allTokensUniq << S.words
-
-
-noDuplicateAnagramTokens : String -> Bool
-noDuplicateAnagramTokens =
-  allTokensUniq << L.map (S.join "" << L.sort << S.split "") << S.words
-
-
-allTokensUniq : List String -> Bool
-allTokensUniq tokens =
-  L.length tokens == L.length (L.unique tokens)
+import Helpers
 
 
 solve : Input -> String
 solve { mode, ab, input } =
   let
-    ps =
-      input
-        |> S.split "\\n"
-        |> L.filter (\p -> p /= "")
+    lines : List String
+    lines =
+      Helpers.lines_ input
   in
     case ( mode, ab ) of
       ( Test, A ) ->
-        toString <| noDuplicateTokens input
+        "UNIMPLEMENTED"
 
       ( Test, B ) ->
-        toString <| noDuplicateAnagramTokens input
+        "UNIMPLEMENTED"
 
       ( Run, A ) ->
-        ps
-          |> L.filter noDuplicateTokens
-          |> L.length
-          |> toString
+        "UNIMPLEMENTED"
 
       ( Run, B ) ->
-        ps
-          |> L.filter noDuplicateAnagramTokens
-          |> L.length
-          |> toString
+        "UNIMPLEMENTED"
 
 
 main =
-  defaultMain solve
+  Helpers.defaultMain solve
