@@ -7,6 +7,11 @@ import Types exposing (Input, Mode(..), AB(..))
 import Helpers
 
 
+a : List String -> Int
+a =
+  L.length << L.filter ((\t -> L.length t == L.length (L.unique t)) << S.words)
+
+
 solve : Input -> String
 solve { mode, ab, input } =
   let
@@ -22,7 +27,7 @@ solve { mode, ab, input } =
         "UNIMPLEMENTED"
 
       ( Run, A ) ->
-        "UNIMPLEMENTED"
+        toString <| a lines
 
       ( Run, B ) ->
         "UNIMPLEMENTED"
