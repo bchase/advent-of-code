@@ -143,10 +143,6 @@ buildShifts = map (\(Shift id' evts) -> Shift id' (reverse evts)) . foldl buildS
 
 
 
----- B ----
-
-
-
 ---- PARSING ----
 
 parseEntries :: [String] -> [Entry]
