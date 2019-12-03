@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+
+const fs = require('fs')
+
+const {Elm} = require('./elm.js')
+
+
+
+/// ELM GLUE ///
+
+const run = function(day, mode, flags) {
+  Elm[`Day${day}`][mode].init({flags})
+    .ports.exit.subscribe((output) => {
+      console.log(output)
+      process.exit(output.success ? 0 : 1)
+    })
+}
+
+
+
+/// EXECUTE ///
+
+const [day, mode]  = process.argv.slice(2)
+const input = fs.readFileSync('/dev/stdin').toString()
+
+if ( day.match(/\d{2}/) || mode == 'A' || mode == 'B' ) {
+  run(day, mode, input)
+} else {
+  console.log(`Invalid \`day\` or \`mode\` argument: ${day} ${mode}`)
+}
