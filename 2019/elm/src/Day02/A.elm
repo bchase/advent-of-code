@@ -11,9 +11,11 @@ solve : String -> String
 solve input =
   input
     |> parse
-    |> prepare
+    |> prepare (12, 2)
     |> execProg 0
-    |> output
+    |> Array.get 0
+    |> fromJust
+    |> String.fromInt
 
 
 test : String -> String
@@ -21,7 +23,9 @@ test input =
   input
     |> parse
     |> execProg 0
-    |> progToString
+    |> Array.toList
+    |> List.map String.fromInt
+    |> String.join ","
 
 
 
@@ -36,19 +40,6 @@ parse raw =
     |> List.filter ((/=) "")
     |> List.map (String.toInt >> fromJust)
     |> Array.fromList
-
-output : Program -> String
-output prog =
-  prog
-    |> Array.get 0
-    |> Debug.toString
-
-progToString : Program -> String
-progToString prog =
-  prog
-    |> Array.toList
-    |> List.map String.fromInt
-    |> String.join ","
 
 
 
@@ -78,12 +69,11 @@ toOp int = case int of
 
 
 
-prepare : Program -> Program
-prepare prog =
+prepare : (Int, Int) -> Program -> Program
+prepare (noun, verb) prog =
   prog
-    |> Array.set 1 12
-    |> Array.set 2 2
-
+    |> Array.set 1 noun
+    |> Array.set 2 verb
 
 
 execProg : Int -> Program -> Program
