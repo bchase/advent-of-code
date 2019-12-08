@@ -28,9 +28,15 @@ suite =
         A.requiredFuelForMass 100756
           |> Expect.equal 33583
       ]
-    -- , describe "B"
-    --   [ test "something" <| \_ ->
-    --     B.solve "123"
-    --       |> Expect.equal "123"
-    --   ]
+    , describe "B"
+      [ test "solve 1" <| \_ ->
+        B.solve "14"
+          |> Expect.equal "2"
+      , test "solve 2" <| \_ ->
+        B.solve "1969"
+          |> Expect.equal "966"
+      , test "solve 3" <| \_ ->
+        B.solve "100756"
+          |> Expect.equal "50346"
+      ]
     ]

@@ -1,6 +1,6 @@
-module Day01.A exposing (main, solve, requiredFuelForMass)
+module Day01.A exposing (..)
 
-import Helpers exposing (wrap)
+import Helpers exposing (wrap, fromJust)
 
 main = wrap solve
 
@@ -9,25 +9,30 @@ main = wrap solve
 solve : String -> String
 solve input =
   input
-    |> String.split "\n"
-    |> List.filter (\ str -> not (str == "") )
-    |> List.map (String.toInt >> fromJust)
-    |> List.map requiredFuelForMass
-    |> List.sum
+    |> parse
+    |> solve_
     |> String.fromInt
+
+
+solve_ : List Int -> Int
+solve_ = solve__ requiredFuelForMass
+
+
+solve__ : (Int -> Int) -> List Int -> Int
+solve__ calc masses =
+  masses
+    |> List.map calc
+    |> List.sum
+
+
+parse : String -> List Int
+parse input =
+  input
+    |> String.trim
+    |> String.split "\n"
+    |> List.map (String.toInt >> fromJust)
 
 
 requiredFuelForMass : Int -> Int
 requiredFuelForMass mass =
-  toFloat mass / toFloat 3
-    |> floor
-    |> ((-) 2)
-    |> negate
-  -- div 3, round down, sub 2
-
-
-fromJust : Maybe a -> a
-fromJust mx = case mx of
-  Just x  -> x
-  Nothing -> Debug.todo ""
-
+  ((toFloat mass / 3) - 2) |> floor

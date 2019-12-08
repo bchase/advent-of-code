@@ -11,7 +11,7 @@ import Day02.B as B
 
 suite : Test
 suite =
-  only <| describe "Day02"
+  describe "Day02"
     [ describe "A.execute"
       [ test "case 1" <| \_ ->
         A.test "1,0,0,0,99"
